@@ -41,6 +41,12 @@ def warmup_models():
     encode_text("warmup")
 
 
+@app.get("/")
+@app.head("/")
+def health_check():
+    return {"status": "ok"}
+
+
 def determine_decision_level(ib_lbl, ic_lbl):
     print(f"Determining decision level for IB label: {ib_lbl}, IC label: {ic_lbl}")
     if ic_lbl == "high-complexity":
