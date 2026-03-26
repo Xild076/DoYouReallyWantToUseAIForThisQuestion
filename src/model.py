@@ -24,8 +24,10 @@ def get_sbert_model():
     model.eval()
     return model
 
-
-from .dataset_builder import read_dataset, split_dataset
+try:
+    from .dataset_builder import read_dataset, split_dataset
+except ImportError:
+    from dataset_builder import read_dataset, split_dataset
 
 def prepare_data(dataset_file):
     dataset = read_dataset(dataset_file)
@@ -108,6 +110,7 @@ def run_inference(text, model):
 
 if __name__ == "__main__":
     train_data, test_data = prepare_data('data/ib_dataset.csv')
+    print(len(train_data), len(test_data))
     train_embeddings, train_labels, test_embeddings, test_labels = vectorize_data(train_data, test_data)
     model_ib = train_model(train_embeddings, train_labels, epoch=100)
     ib_accuracy, ib_f1 = evaluate_model(model_ib, test_embeddings, test_labels)
