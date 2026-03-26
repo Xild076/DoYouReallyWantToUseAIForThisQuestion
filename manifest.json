@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "DYRWTUAFTQ",
+  "version": "0.1",
+  "host_permissions": [
+    "http://127.0.0.1:8000/*",
+    "http://localhost:8000/*",
+    "https://chatgpt.com/*",
+    "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://chat.google.com/*",
+    "https://chat.mistral.ai/*"
+  ],
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://chat.google.com/*",
+        "https://chat.mistral.ai/*"
+      ],
+      "js": ["content-script.js"]
+    }
+  ]
+}

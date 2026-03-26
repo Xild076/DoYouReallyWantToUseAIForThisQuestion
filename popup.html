@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DYRWTUAFTQ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --primary-red: #E3381B;
+        --pure-white: #ffffff;
+        --pure-black: #000000;
+        --border-width: 2px;
+      }
+      body {
+        font-family: 'Space Mono', monospace;
+        margin: 0;
+        padding: 20px;
+        background: var(--pure-white);
+        color: var(--pure-black);
+        width: 320px;
+        border: var(--border-width) solid var(--pure-black);
+        box-sizing: border-box;
+      }
+      h1 {
+        font-family: 'Libre Baskerville', serif;
+        margin: 0 0 10px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+        border-bottom: var(--border-width) solid var(--pure-black);
+        padding-bottom: 10px;
+      }
+      p {
+        margin: 0 0 20px;
+        font-size: 0.8rem;
+        line-height: 1.4;
+        font-weight: 700;
+      }
+      .section {
+        background: var(--pure-white);
+        border: var(--border-width) solid var(--pure-black);
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 4px 4px 0 var(--pure-black);
+        transition: transform 0.1s, box-shadow 0.1s;
+      }
+      .section:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 6px 6px 0 var(--pure-black);
+      }
+      label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+      }
+      input[type='checkbox'] {
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        border: var(--border-width) solid var(--pure-black);
+        background: var(--pure-white);
+        cursor: pointer;
+        position: relative;
+        transition: background 0.2s;
+      }
+      input[type='checkbox']:checked {
+        background: var(--primary-red);
+      }
+      input[type='checkbox']:checked::after {
+        content: '';
+        position: absolute;
+        left: 6px;
+        top: 2px;
+        width: 6px;
+        height: 12px;
+        border: solid var(--pure-white);
+        border-width: 0 3px 3px 0;
+        transform: rotate(45deg);
+      }
+      button {
+        margin-top: 10px;
+        width: 100%;
+        border: var(--border-width) solid var(--pure-black);
+        padding: 12px;
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        font-size: 1rem;
+        text-transform: uppercase;
+        cursor: pointer;
+        background: var(--primary-red);
+        color: var(--pure-white);
+        box-shadow: 4px 4px 0 var(--pure-black);
+        transition: all 0.1s;
+      }
+      button:active {
+        box-shadow: 0 0 0 var(--pure-black);
+        transform: translate(4px, 4px);
+      }
+      .status {
+        font-size: 0.75rem;
+        color: var(--pure-black);
+        margin-top: 10px;
+        font-style: italic;
+        opacity: 0;
+        transition: opacity 0.3s;
+        text-align: center;
+      }
+      .status.visible {
+        opacity: 1;
+      }
+      .desc {
+        font-size: 0.7rem;
+        font-weight: 400;
+        margin-top: 8px;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>DYRWTUAFTQ</h1>
+    <p>DO YOU REALLY WANT TO USE AI FOR THIS QUESTION?</p>
+
+    <div class="section">
+      <label for="auto-check">
+        SYSTEM ACTIVE
+        <input type="checkbox" id="auto-check" />
+      </label>
+      <div class="desc">Intercept prompts to save computation and block slop.</div>
+    </div>
+
+    <div class="section">
+      <label for="force-confirm">
+        STRICT MODE
+        <input type="checkbox" id="force-confirm" />
+      </label>
+      <div class="desc">Demand explicit confirmation on borderline queries.</div>
+    </div>
+
+    <button id="save-settings">APPLY PROTOCOL</button>
+    <div class="status" id="settings-status">SETTINGS SAVED.</div>
+    <script src="popup.js"></script>
+  </body>
+</html>
