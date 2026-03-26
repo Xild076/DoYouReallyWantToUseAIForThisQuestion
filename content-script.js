@@ -295,12 +295,14 @@ async function guardedAction(promptEl, action) {
         guardBypass = true;
         action();
       } else {
+        const googleUrl = `https://www.google.com/search?udm=14&q=${encodeURIComponent(textValue)}`;
+        window.open(googleUrl, "_blank");
         clearPrompt(promptEl);
       }
       return;
     }
     case "no-ai": {
-      const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(textValue)}`;
+      const googleUrl = `https://www.google.com/search?udm=14&q=${encodeURIComponent(textValue)}`;
       window.open(googleUrl, "_blank");
       clearPrompt(promptEl);
       return;
