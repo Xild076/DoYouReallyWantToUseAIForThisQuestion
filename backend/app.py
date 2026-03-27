@@ -13,10 +13,13 @@ from src.model import encode_text, get_sbert_model, load_model, predict_from_emb
 
 app = FastAPI()
 
-torch.set_num_threads(int(os.getenv("PROMPT_SENTINEL_TORCH_THREADS", "4")))
+def _getenv(name: str, default: str) -> str:
+    return os.getenv(name, default)
 
-CACHE_TTL_SECONDS = int(os.getenv("PROMPT_SENTINEL_CACHE_TTL_SECONDS", "900"))
-CACHE_MAX_ENTRIES = int(os.getenv("PROMPT_SENTINEL_CACHE_MAX_ENTRIES", "5000"))
+torch.set_num_threads(int(_getenv("DYRWTUAFTQ_TORCH_THREADS", "4")))
+
+CACHE_TTL_SECONDS = int(_getenv("DYRWTUAFTQ_CACHE_TTL_SECONDS", "900"))
+CACHE_MAX_ENTRIES = int(_getenv("DYRWTUAFTQ_CACHE_MAX_ENTRIES", "5000"))
 
 _inference_cache = OrderedDict()
 _cache_lock = Lock()

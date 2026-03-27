@@ -2,13 +2,15 @@ const targetSelector = "textarea";
 const userInputSelectors = ["textarea", "[contenteditable=\"true\"]", "[role=\"textbox\"]", "input:not([type=hidden])"];
 let autoCheckEnabled = true;
 let requireConfirmation = true;
+let disableGoogleAi = true;
 let guardBypass = false;
 let lastFocusedPrompt = null;
+const settingsKey = 'dyrwtuaftqSettings';
 
 function ensureModalStyles() {
-  if (document.getElementById('prompt-sentinel-modal-style')) return;
+  if (document.getElementById('dyrwtuaftq-modal-style')) return;
   const style = document.createElement('style');
-  style.id = 'prompt-sentinel-modal-style';
+  style.id = 'dyrwtuaftq-modal-style';
   style.textContent = `
     @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&family=Space+Mono:wght@400;700&display=swap');
     
@@ -173,15 +175,16 @@ async function checkPrompt(text, mode = "ic") {
 }
 
 function refreshSettings() {
-  chrome.storage.sync.get('promptSentinelSettings', (data) => {
-    const settings = data.promptSentinelSettings || {};
+  chrome.storage.sync.get(settingsKey, (data) => {
+    const settings = data[settingsKey] || {};
     autoCheckEnabled = settings.autoCheck !== false;
     requireConfirmation = settings.forceConfirm !== false;
+    disableGoogleAi = settings.disableGoogleAi === true;
   });
 }
 
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'sync' && changes.promptSentinelSettings) {
+  if (area === 'sync' && changes[settingsKey]) {
     refreshSettings();
   }
 });
@@ -216,13 +219,36 @@ function clearPrompt(el) {
   el.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
+function openGoogleSearch(query) {
+  let googleUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+  if (disableGoogleAi) {
+    googleUrl += `&udm=14`;
+  }
+  window.open(googleUrl, "_blank");
+}
+
+function submitPrompt(promptEl, preferredButton = null) {
+  const sendButton = preferredButton && preferredButton.isConnected ? preferredButton : findSendButton();
+  if (sendButton) {
+    sendButton.click();
+    return;
+  }
+  if (promptEl?.form && typeof promptEl.form.requestSubmit === 'function') {
+    promptEl.form.requestSubmit();
+    return;
+  }
+  if (promptEl?.form) {
+    promptEl.form.submit();
+  }
+}
+
 async function guardedAction(promptEl, action) {
   const textValue = getPromptValue(promptEl);
   const verdict = await checkPrompt(textValue, "ic");
   if (!verdict) {
     await showDecisionModal({
-      title: 'Prompt Sentinel',
-      message: 'Prompt Sentinel could not validate this prompt (no response from extension).',
+      title: 'DYRWTUAFTQ',
+      message: 'DYRWTUAFTQ could not validate this prompt (no response from extension).',
       actions: [{ label: 'Send Anyway', value: 'send', kind: 'primary' }, { label: 'Cancel', value: 'cancel' }],
       dismissAction: { value: 'cancel' },
     }).then((choice) => {
@@ -236,7 +262,7 @@ async function guardedAction(promptEl, action) {
 
   if (verdict.error === "extension_unreachable") {
     const decision = await showDecisionModal({
-      title: 'Prompt Sentinel Extension Error',
+      title: 'DYRWTUAFTQ Extension Error',
       message: `Extension communication failed.\n\n${verdict.detail || 'Unknown error.'}`,
       actions: [{ label: 'Send Anyway', value: 'send', kind: 'primary' }, { label: 'Cancel', value: 'cancel' }],
       dismissAction: { value: 'cancel' },
@@ -252,7 +278,7 @@ async function guardedAction(promptEl, action) {
     const detail = verdict.detail ? `\n\nDetail: ${verdict.detail}` : "";
     const decision = await showDecisionModal({
       title: 'Backend Unreachable',
-      message: `Prompt Sentinel backend unreachable.${detail}`,
+      message: `DYRWTUAFTQ backend unreachable.${detail}`,
       actions: [{ label: 'Send Anyway', value: 'send', kind: 'primary' }, { label: 'Cancel', value: 'cancel' }],
       dismissAction: { value: 'cancel' },
     });
@@ -266,7 +292,7 @@ async function guardedAction(promptEl, action) {
   if (verdict.error === "backend_error") {
     const decision = await showDecisionModal({
       title: 'Backend Error',
-      message: `Prompt Sentinel backend error (${verdict.status || "unknown"}).`,
+      message: `DYRWTUAFTQ backend error (${verdict.status || "unknown"}).`,
       actions: [{ label: 'Send Anyway', value: 'send', kind: 'primary' }, { label: 'Cancel', value: 'cancel' }],
       dismissAction: { value: 'cancel' },
     });
@@ -295,15 +321,13 @@ async function guardedAction(promptEl, action) {
         guardBypass = true;
         action();
       } else {
-        const googleUrl = `https://www.google.com/search?udm=14&q=${encodeURIComponent(textValue)}`;
-        window.open(googleUrl, "_blank");
+        openGoogleSearch(textValue);
         clearPrompt(promptEl);
       }
       return;
     }
     case "no-ai": {
-      const googleUrl = `https://www.google.com/search?udm=14&q=${encodeURIComponent(textValue)}`;
-      window.open(googleUrl, "_blank");
+      openGoogleSearch(textValue);
       clearPrompt(promptEl);
       return;
     }
@@ -373,12 +397,7 @@ document.addEventListener("submit", async (event) => {
   event.stopImmediatePropagation();
 
   await guardedAction(promptEl, () => {
-    if (promptEl.form) {
-      promptEl.form.submit();
-    } else {
-      const sendButton = findSendButton();
-      if (sendButton) sendButton.click();
-    }
+    submitPrompt(promptEl);
   });
 }, true);
 
@@ -396,12 +415,7 @@ document.addEventListener("keydown", async (event) => {
   event.preventDefault();
   event.stopImmediatePropagation();
   await guardedAction(promptEl, () => {
-    const sendButton = findSendButton();
-    if (sendButton) {
-      sendButton.click();
-    } else if (promptEl.form) {
-      promptEl.form.submit();
-    }
+    submitPrompt(promptEl);
   });
 }, true);
 
@@ -419,5 +433,5 @@ document.addEventListener('click', async (event) => {
   if (!text) return;
   event.preventDefault();
   event.stopImmediatePropagation();
-  await guardedAction(promptEl, () => button.click());
+  await guardedAction(promptEl, () => submitPrompt(promptEl, button));
 }, true);

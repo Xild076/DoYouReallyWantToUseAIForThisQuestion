@@ -1,45 +1,5 @@
 let backendHost = "http://127.0.0.1:8000";
 
-const UDM_RULE_ID = 1001;
-
-function installUdmRule() {
-  if (!chrome.declarativeNetRequest?.updateDynamicRules) {
-    return;
-  }
-
-  chrome.declarativeNetRequest.updateDynamicRules({
-    removeRuleIds: [UDM_RULE_ID],
-    addRules: [
-      {
-        id: UDM_RULE_ID,
-        priority: 1,
-        action: {
-          type: "redirect",
-          redirect: {
-            transform: {
-              queryTransform: {
-                addOrReplaceParams: [{ key: "udm", value: "14" }],
-              },
-            },
-          },
-        },
-        condition: {
-          regexFilter: "^https?://(www\\.)?google\\.[^/]+/search\\?.*",
-          resourceTypes: ["main_frame"],
-        },
-      },
-    ],
-  });
-}
-
-chrome.runtime.onInstalled.addListener(() => {
-  installUdmRule();
-});
-
-chrome.runtime.onStartup.addListener(() => {
-  installUdmRule();
-});
-
 function normalizeHost(host) {
   const value = (host || "").trim();
   if (!value) return "http://127.0.0.1:8000";
@@ -57,8 +17,6 @@ fetch(chrome.runtime.getURL('settings.json'))
     }
   })
   .catch(err => console.error("Failed to load settings.json", err));
-
-installUdmRule();
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type !== "check_prompt") {
@@ -87,7 +45,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({ ...payload, ok: response.ok });
     } catch (err) {
       const detail = err?.message || String(err);
-      console.error("Prompt Sentinel backend request failed", { backendHost, detail });
+      console.error("DYRWTUAFTQ backend request failed", { backendHost, detail });
       sendResponse({ error: "backend_unreachable", detail });
     } finally {
       clearTimeout(timeoutId);

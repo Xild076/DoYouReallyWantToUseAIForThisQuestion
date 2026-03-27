@@ -33,7 +33,7 @@
     "https://chat.google.com/*",
     "https://chat.mistral.ai/*"
   ],
-  "permissions": ["storage", "declarativeNetRequest"],
+  "permissions": ["storage"],
   "action": {
     "default_popup": "popup.html"
   },
@@ -60,6 +60,24 @@
         "https://chat.mistral.ai/*"
       ],
       "js": ["content-script.js"]
+    },
+    {
+      "matches": [
+        "*://*.google.com/search*",
+        "*://*.google.co.uk/search*",
+        "*://*.google.co.in/search*",
+        "*://*.google.ca/search*",
+        "*://*.google.com.au/search*",
+        "*://*.google.de/search*",
+        "*://*.google.fr/search*",
+        "*://*.google.es/search*",
+        "*://*.google.it/search*",
+        "*://*.google.nl/search*",
+        "*://*.google.com.br/search*",
+        "*://*.google.co.jp/search*"
+      ],
+      "js": ["google-script.js"],
+      "run_at": "document_start"
     }
   ]
 }
