@@ -7,6 +7,7 @@ def build_extension_zip():
         "manifest.json",
         "background.js",
         "content-script.js",
+        "google-script.js",
         "popup.html",
         "popup.js",
         "settings.json"

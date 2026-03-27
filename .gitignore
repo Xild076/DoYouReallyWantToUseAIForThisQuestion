@@ -4,3 +4,4 @@
 src/generate_massive_data.py
 *.log
 free-hosting-scale-guide.html
+training.log
