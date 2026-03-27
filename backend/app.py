@@ -1,5 +1,7 @@
 import os
 import time
+from collections import OrderedDict
+from threading import Lock
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,6 +14,43 @@ from src.model import encode_text, get_sbert_model, load_model, predict_from_emb
 app = FastAPI()
 
 torch.set_num_threads(int(os.getenv("PROMPT_SENTINEL_TORCH_THREADS", "4")))
+
+CACHE_TTL_SECONDS = int(os.getenv("PROMPT_SENTINEL_CACHE_TTL_SECONDS", "900"))
+CACHE_MAX_ENTRIES = int(os.getenv("PROMPT_SENTINEL_CACHE_MAX_ENTRIES", "5000"))
+
+_inference_cache = OrderedDict()
+_cache_lock = Lock()
+
+
+def _cache_key(request: InferenceRequest):
+    # Normalize text to maximize cache hit ratio for semantically identical prompts.
+    return f"{request.model_type}|{request.text.strip().lower()}"
+
+
+def _cache_get(key):
+    now = time.time()
+    with _cache_lock:
+        entry = _inference_cache.get(key)
+        if not entry:
+            return None
+        expires_at, payload = entry
+        if now >= expires_at:
+            _inference_cache.pop(key, None)
+            return None
+        _inference_cache.move_to_end(key)
+        return payload.copy()
+
+
+def _cache_set(key, payload):
+    if CACHE_TTL_SECONDS <= 0 or CACHE_MAX_ENTRIES <= 0:
+        return
+
+    expires_at = time.time() + CACHE_TTL_SECONDS
+    with _cache_lock:
+        _inference_cache[key] = (expires_at, payload.copy())
+        _inference_cache.move_to_end(key)
+        while len(_inference_cache) > CACHE_MAX_ENTRIES:
+            _inference_cache.popitem(last=False)
 
 app.add_middleware(
     CORSMiddleware,
@@ -58,6 +97,13 @@ def determine_decision_level(ib_lbl, ic_lbl):
 
 @app.post("/infer")
 def infer(request: InferenceRequest):
+    key = _cache_key(request)
+    cached = _cache_get(key)
+    if cached is not None:
+        cached["cache_hit"] = True
+        cached["latency_ms"] = 0.0
+        return cached
+
     _sbert_model, ib_model, ic_model = load_models()
 
     started = time.perf_counter()
@@ -74,7 +120,7 @@ def infer(request: InferenceRequest):
     print(f"Decision level: {decision_level}")
     print(f"Inference latency (ms): {elapsed_ms}")
 
-    return {
+    payload = {
         "ib": ib_check,
         "ic": ic_check,
         "ib_label": ib_label,
@@ -82,4 +128,8 @@ def infer(request: InferenceRequest):
         "model_type": request.model_type,
         "decision_level": decision_level,
         "latency_ms": elapsed_ms,
+        "cache_hit": False,
     }
+
+    _cache_set(key, payload)
+    return payload
