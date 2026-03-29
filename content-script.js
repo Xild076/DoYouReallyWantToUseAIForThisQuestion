@@ -6,6 +6,13 @@ let disableGoogleAi = true;
 let guardBypass = false;
 let lastFocusedPrompt = null;
 const settingsKey = 'dyrwtuaftqSettings';
+const storageAreaName = (chrome.storage && chrome.storage.sync) ? 'sync' : 'local';
+const storageArea = chrome.storage[storageAreaName];
+const defaultSettings = {
+  autoCheck: true,
+  forceConfirm: true,
+  disableGoogleAi: true,
+};
 
 function ensureModalStyles() {
   if (document.getElementById('dyrwtuaftq-modal-style')) return;
@@ -175,16 +182,16 @@ async function checkPrompt(text, mode = "ic") {
 }
 
 function refreshSettings() {
-  chrome.storage.sync.get(settingsKey, (data) => {
-    const settings = data[settingsKey] || {};
+  storageArea.get(settingsKey, (data) => {
+    const settings = { ...defaultSettings, ...(data[settingsKey] || {}) };
     autoCheckEnabled = settings.autoCheck !== false;
     requireConfirmation = settings.forceConfirm !== false;
-    disableGoogleAi = settings.disableGoogleAi === true;
+    disableGoogleAi = settings.disableGoogleAi !== false;
   });
 }
 
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'sync' && changes[settingsKey]) {
+  if (area === storageAreaName && changes[settingsKey]) {
     refreshSettings();
   }
 });

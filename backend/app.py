@@ -25,7 +25,7 @@ _inference_cache = OrderedDict()
 _cache_lock = Lock()
 
 
-def _cache_key(request: InferenceRequest):
+def _cache_key(request: "InferenceRequest"):
     # Normalize text to maximize cache hit ratio for semantically identical prompts.
     return f"{request.model_type}|{request.text.strip().lower()}"
 

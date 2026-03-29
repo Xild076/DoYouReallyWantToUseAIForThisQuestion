@@ -1,4 +1,11 @@
 let backendHost = "http://127.0.0.1:8000";
+const settingsKey = 'dyrwtuaftqSettings';
+const storageArea = (chrome.storage && chrome.storage.sync) ? chrome.storage.sync : chrome.storage.local;
+const defaultSettings = {
+  autoCheck: true,
+  forceConfirm: true,
+  disableGoogleAi: true,
+};
 
 function normalizeHost(host) {
   const value = (host || "").trim();
@@ -9,14 +16,38 @@ function normalizeHost(host) {
   return `http://${value.replace(/\/$/, "")}`;
 }
 
-fetch(chrome.runtime.getURL('settings.json'))
+function ensureDefaultSettings() {
+  storageArea.get(settingsKey, (data) => {
+    const existing = data[settingsKey] || {};
+    const merged = { ...defaultSettings, ...existing };
+    const hasMissingDefaults = Object.keys(defaultSettings).some((key) => typeof existing[key] === 'undefined');
+
+    if (hasMissingDefaults) {
+      storageArea.set({ [settingsKey]: merged });
+    }
+  });
+}
+
+chrome.runtime.onInstalled.addListener(() => {
+  ensureDefaultSettings();
+});
+
+chrome.runtime.onStartup.addListener(() => {
+  ensureDefaultSettings();
+});
+
+ensureDefaultSettings();
+
+const backendHostReady = fetch(chrome.runtime.getURL('settings.json'))
   .then(r => r.json())
   .then(data => {
     if (data.backendHost) {
       backendHost = normalizeHost(data.backendHost);
     }
   })
-  .catch(err => console.error("Failed to load settings.json", err));
+  .catch(err => {
+    console.error("Failed to load settings.json", err);
+  });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type !== "check_prompt") {
@@ -28,6 +59,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   (async () => {
     try {
+      await backendHostReady;
+
       const response = await fetch(`${backendHost}/infer`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

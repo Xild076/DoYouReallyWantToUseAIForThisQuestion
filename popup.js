@@ -1,19 +1,21 @@
 const storageKey = 'dyrwtuaftqSettings';
+const defaultSettings = {
+  autoCheck: true,
+  forceConfirm: true,
+  disableGoogleAi: true
+};
+const storageArea = (chrome.storage && chrome.storage.sync) ? chrome.storage.sync : chrome.storage.local;
 const autoCheck = document.getElementById('auto-check');
 const forceConfirm = document.getElementById('force-confirm');
 const disableGoogleAi = document.getElementById('disable-google-ai');
 const status = document.getElementById('settings-status');
 
 function loadSettings() {
-  chrome.storage.sync.get(storageKey, (data) => {
-    const settings = data[storageKey] || {
-      autoCheck: true,
-      forceConfirm: true,
-      disableGoogleAi: true
-    };
-    autoCheck.checked = settings.autoCheck;
-    forceConfirm.checked = settings.forceConfirm;
-    disableGoogleAi.checked = settings.disableGoogleAi === true;
+  storageArea.get(storageKey, (data) => {
+    const settings = { ...defaultSettings, ...(data[storageKey] || {}) };
+    autoCheck.checked = settings.autoCheck !== false;
+    forceConfirm.checked = settings.forceConfirm !== false;
+    disableGoogleAi.checked = settings.disableGoogleAi !== false;
   });
 }
 
@@ -23,7 +25,7 @@ function saveSettings() {
     forceConfirm: forceConfirm.checked,
     disableGoogleAi: disableGoogleAi.checked
   };
-  chrome.storage.sync.set({ [storageKey]: settings }, () => {
+  storageArea.set({ [storageKey]: settings }, () => {
     status.textContent = 'SAVED.';
     status.classList.add('visible');
     setTimeout(() => {
