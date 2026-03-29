@@ -58,7 +58,7 @@ def build_extension_zips():
     base_manifest = load_manifest("manifest.json")
 
     # Chrome/Chromium package
-    create_zip("extension_release.zip", base_manifest, extension_files)
+    create_zip("extension_chromium_release.zip", base_manifest, extension_files)
 
     # Firefox package with gecko metadata
     firefox_manifest = dict(base_manifest)

@@ -47,7 +47,26 @@ python backend/app.py
 3. Enable **Developer mode** in the top right.
 4. Click **Load unpacked** and select the root directory of this repository.
 
-### 3. Firefox Support
+### 3. Add / Replace Extension Icons
+The extension now reads icons from `icons/` via `manifest.json`.
+
+1. Generate baseline icon files (16, 32, 48, 96, 128):
+```bash
+python scripts/generate_extension_icons.py
+```
+2. Replace the generated files in `icons/` with your branded PNGs using the same names:
+	- `icon16.png`
+	- `icon32.png`
+	- `icon48.png`
+	- `icon96.png`
+	- `icon128.png`
+3. Reload the unpacked extension in your browser to see the new icon.
+4. Rebuild release artifacts:
+```bash
+python build_extension.py
+```
+
+### 4. Firefox Support
 This project can also be packaged for Firefox.
 
 1. Build both extension zips:
