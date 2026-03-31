@@ -53,19 +53,44 @@ def create_zip(zip_filename, manifest, extension_files):
                 print(f"  [!] Warning: {file} not found. Skipping.")
 
 
+def build_firefox_manifest(base_manifest):
+    # Deep-copy via JSON to avoid mutating the source manifest.
+    firefox_manifest = json.loads(json.dumps(base_manifest))
+
+    browser_settings = firefox_manifest.get("browser_specific_settings", {})
+    gecko_settings = browser_settings.get("gecko", {})
+    browser_settings["gecko"] = {**FIREFOX_GECKO_SETTINGS, **gecko_settings}
+    firefox_manifest["browser_specific_settings"] = browser_settings
+
+    # Firefox uses background scripts for compatibility.
+    background = firefox_manifest.get("background", {})
+    service_worker = background.get("service_worker")
+    if service_worker:
+        if "scripts" not in background:
+            background["scripts"] = [service_worker]
+        background.pop("service_worker", None)
+        firefox_manifest["background"] = background
+
+    return firefox_manifest
+
+
 def build_extension_zips():
+    for legacy_file in ("extension_release.zip", "extension_firefox_release.zip"):
+        if os.path.exists(legacy_file):
+            os.remove(legacy_file)
+            print(f"Removed legacy artifact {legacy_file}")
+
     extension_files = collect_extension_files()
     base_manifest = load_manifest("manifest.json")
 
     # Chrome/Chromium package
     create_zip("extension_chromium_release.zip", base_manifest, extension_files)
 
-    # Firefox package with gecko metadata
-    firefox_manifest = dict(base_manifest)
-    firefox_manifest["browser_specific_settings"] = {"gecko": FIREFOX_GECKO_SETTINGS}
-    create_zip("extension_firefox_release.zip", firefox_manifest, extension_files)
+    # Firefox package with gecko metadata and background fallback.
+    firefox_manifest = build_firefox_manifest(base_manifest)
+    create_zip("extension_firefox_release.xpi", firefox_manifest, extension_files)
 
-    print("\nSuccess! Built extension_release.zip (Chrome/Chromium) and extension_firefox_release.zip (Firefox).")
+    print("\nSuccess! Built extension_chromium_release.zip (Chrome/Chromium) and extension_firefox_release.xpi (Firefox).")
 
 if __name__ == "__main__":
     build_extension_zips()

@@ -69,13 +69,14 @@ python build_extension.py
 ### 4. Firefox Support
 This project can also be packaged for Firefox.
 
-1. Build both extension zips:
+1. Build extension artifacts:
 ```bash
 python build_extension.py
 ```
-2. Use `extension_firefox_release.zip` for Firefox.
-3. For local testing in Firefox, open `about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on**, and choose the project's `manifest.json` file (or the `manifest.json` from an extracted Firefox package).
-4. For permanent distribution, submit `extension_firefox_release.zip` to AMO (addons.mozilla.org).
+2. Use `extension_firefox_release.xpi` for Firefox distribution.
+3. For local testing, open `about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on**, and choose `extension_firefox_release.xpi`.
+4. For permanent installation on stable Firefox, the add-on must be signed by AMO. Unsigned files can show "appears to be corrupt" in `about:addons`.
+5. For permanent distribution, submit `extension_firefox_release.xpi` to AMO (addons.mozilla.org).
 
 ## Da Goal
 Save energy and compute power by questioning whether we really need to fire up massive LLMs just to do basic arithmetic or ask standard search-engine questions so that we don't kill our planet.
