@@ -2,14 +2,16 @@ import os
 import time
 from collections import OrderedDict
 from threading import Lock
+from typing import Any, Dict, Optional
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from functools import lru_cache
 import torch
 
 from src.model import encode_text, get_sbert_model, load_model, predict_from_embedding
+from src.send_feedback import FeedbackSubmissionError, write_feedback_payload
 
 app = FastAPI()
 
@@ -66,6 +68,22 @@ app.add_middleware(
 class InferenceRequest(BaseModel):
     text: str
     model_type: str = "ic"
+
+
+class FeedbackRequest(BaseModel):
+    prompt: str
+    actual_label: Optional[str] = None
+    feedback_type: Optional[str] = None
+    expected_label: Optional[str] = None
+    predicted_decision: Optional[str] = None
+    expected_decision: Optional[str] = None
+    model_type: Optional[str] = None
+    ib_label: Optional[str] = None
+    ic_label: Optional[str] = None
+    source_url: Optional[str] = None
+    notes: Optional[str] = None
+    submitted_at: Optional[str] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
 @lru_cache(maxsize=1)
@@ -136,3 +154,14 @@ def infer(request: InferenceRequest):
 
     _cache_set(key, payload)
     return payload
+
+
+@app.post("/feedback")
+def feedback(request: FeedbackRequest):
+    try:
+        payload = write_feedback_payload(request.dict())
+        return {"status": "ok", "feedback": payload}
+    except FeedbackSubmissionError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Feedback submission failed.") from exc

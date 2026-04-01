@@ -6,3 +6,4 @@ src/generate_massive_data.py
 free-hosting-scale-guide.html
 training.log
 src/expand_dataset_massive.py
+creds.json

@@ -5,3 +5,5 @@ pydantic
 torch
 sentence-transformers
 scikit-learn
+gspread
+oauth2client

@@ -63,6 +63,14 @@
         letter-spacing: 0.05em;
         cursor: pointer;
       }
+      .field-label {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        margin: 10px 0 6px;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+      }
       input[type='checkbox'] {
         appearance: none;
         width: 24px;
@@ -87,6 +95,22 @@
         border-width: 0 3px 3px 0;
         transform: rotate(45deg);
       }
+      input[type='text'],
+      textarea,
+      select {
+        width: 100%;
+        box-sizing: border-box;
+        border: var(--border-width) solid var(--pure-black);
+        padding: 8px 10px;
+        font-family: 'Space Mono', monospace;
+        font-size: 0.78rem;
+        background: var(--pure-white);
+        color: var(--pure-black);
+      }
+      textarea {
+        min-height: 74px;
+        resize: vertical;
+      }
       button {
         margin-top: 10px;
         width: 100%;
@@ -106,6 +130,10 @@
         box-shadow: 0 0 0 var(--pure-black);
         transform: translate(4px, 4px);
       }
+      button.secondary {
+        background: var(--pure-white);
+        color: var(--pure-black);
+      }
       .status {
         font-size: 0.75rem;
         color: var(--pure-black);
@@ -123,6 +151,18 @@
         font-weight: 400;
         margin-top: 8px;
         color: #333;
+      }
+      .last-inference {
+        margin-top: 10px;
+        font-size: 0.68rem;
+        line-height: 1.45;
+        border: var(--border-width) solid var(--pure-black);
+        padding: 8px;
+        background: #f4f4f4;
+        white-space: pre-wrap;
+      }
+      .last-inference.empty {
+        display: none;
       }
     </style>
   </head>
@@ -156,7 +196,34 @@
 
     <button id="save-settings">APPLY PROTOCOL</button>
     <div class="status" id="settings-status">SETTINGS SAVED.</div>
-    <script src="popup.js"></script>
+
+    <div class="section">
+      <label class="field-label" for="feedback-prompt">Feedback Prompt / Query</label>
+      <textarea id="feedback-prompt" placeholder="Paste the prompt that was classified..."></textarea>
+
+      <div class="last-inference empty" id="latest-inference"></div>
+
+      <label class="field-label" for="feedback-predicted">Model Predicted</label>
+      <select id="feedback-predicted">
+        <option value="">Unknown</option>
+        <option value="allow">allow</option>
+        <option value="maybe">maybe</option>
+        <option value="no-ai">no-ai</option>
+      </select>
+
+      <label class="field-label" for="feedback-expected">Actual Label</label>
+      <select id="feedback-expected">
+        <option value="allow">allow</option>
+        <option value="maybe">maybe</option>
+        <option value="no-ai">no-ai</option>
+      </select>
+
+      <label class="field-label" for="feedback-notes">Notes (Optional)</label>
+      <textarea id="feedback-notes" placeholder="Why should the label be different?"></textarea>
+
+      <button class="secondary" id="submit-feedback" type="button">SEND FEEDBACK</button>
+      <div class="status" id="feedback-status"></div>
+    </div>
 
     <div class="section">
       <div class="desc">Please note that this extension is a personal project run on a free hosting service (HF Spaces) and trained on a small and limited dataset. It will produce false positives, false negatives, and sometimes might not even connect to the backend. Please use this more as a reminder to think critically about whether you really should be using AI :D.</div>
@@ -166,5 +233,6 @@
       Btw, if you wanna support the project, consider <a href="https://ko-fi.com/xild076" target="_blank">donating</a>!
     </div>
 
+    <script src="popup.js"></script>
   </body>
 </html>

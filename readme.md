@@ -47,6 +47,20 @@ python backend/app.py
 3. Enable **Developer mode** in the top right.
 4. Click **Load unpacked** and select the root directory of this repository.
 
+### Feedback To Google Sheets
+The extension popup now includes a **SEND FEEDBACK** section. It sends feedback to backend `POST /feedback`, and the backend appends a row to Google Sheets via `src/send_feedback.py`.
+
+1. Install Google Sheets dependencies:
+```bash
+pip install -r requirements.txt
+```
+2. Create a Google service account and download the key as `creds.json` in repo root (or set `DYRWTUAFTQ_GOOGLE_CREDS_FILE` to a different path).
+3. Create/open a sheet named `AIImportance Feedback` (or set `DYRWTUAFTQ_FEEDBACK_SHEET_NAME`).
+4. Share that sheet with the service account email from `creds.json`.
+5. (Optional) set worksheet tab name with `DYRWTUAFTQ_FEEDBACK_WORKSHEET` (defaults to `MAIN`, falls back to first tab if missing).
+6. Run backend (`python backend/app.py`) and reload the extension.
+7. In the extension popup, submit feedback from the new feedback section.
+
 ### 3. Add / Replace Extension Icons
 The extension now reads icons from `icons/` via `manifest.json`.
 
