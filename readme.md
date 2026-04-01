@@ -54,12 +54,19 @@ The extension popup now includes a **SEND FEEDBACK** section. It sends feedback 
 ```bash
 pip install -r requirements.txt
 ```
-2. Create a Google service account and download the key as `creds.json` in repo root (or set `DYRWTUAFTQ_GOOGLE_CREDS_FILE` to a different path).
-3. Create/open a sheet named `AIImportance Feedback` (or set `DYRWTUAFTQ_FEEDBACK_SHEET_NAME`).
-4. Share that sheet with the service account email from `creds.json`.
-5. (Optional) set worksheet tab name with `DYRWTUAFTQ_FEEDBACK_WORKSHEET` (defaults to `MAIN`, falls back to first tab if missing).
-6. Run backend (`python backend/app.py`) and reload the extension.
-7. In the extension popup, submit feedback from the new feedback section.
+2. Create a Google service account key JSON.
+3. Choose one auth method:
+   - **HF Spaces (recommended):** add a Space Secret named `DYRWTUAFTQ_GOOGLE_CREDS_JSON` (or `GOOGLE_CREDS_JSON`) with the full service account JSON content.
+   - **Local dev:** save the key file as `creds.json` in repo root (or set `DYRWTUAFTQ_GOOGLE_CREDS_FILE` to another path).
+4. Create/open your feedback sheet (default name in code: `DYRWTUAFTQ Feedback Document`), or set `DYRWTUAFTQ_FEEDBACK_SHEET_NAME` to one of:
+   - Spreadsheet title
+   - Spreadsheet ID (the long ID from the sheet URL)
+   - Full spreadsheet URL
+   Do not wrap the value in quotes.
+5. Share that sheet with the service account email from your JSON key.
+6. (Optional) set worksheet tab name with `DYRWTUAFTQ_FEEDBACK_WORKSHEET` (defaults to `MAIN`, falls back to first tab if missing).
+7. Run backend (`python backend/app.py`) and reload the extension.
+8. In the extension popup, submit feedback from the new feedback section.
 
 ### 3. Add / Replace Extension Icons
 The extension now reads icons from `icons/` via `manifest.json`.
